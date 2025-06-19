@@ -1,190 +1,78 @@
 # Sign Radar Classification - MICCAI 2025
-Training arguments
 
---video_path
-Type: Path
-Description: Path to the dataset folder.
+This repository provides an end-to-end framework for training and evaluating radar-based sign language classification models, leveraging both video data and range Doppler maps. The approach presented here extends our previous studies and has been accepted for publication at MICCAI 2025.
 
---split_path
-Type: Path
-Description: Path to the metadata file (in .pt format) of the dataset.
+Below is a concise list of critical training arguments:
 
---load_embeddings
-Type: int (converted to boolean)
-Default: 0
-Description: If using embeddings instead of videos (e.g., for classification with a frozen backbone).
+• --video_path (Path): Path to the dataset folder.  
+• --split_path (Path): Path to the dataset metadata (.pt file).  
+• --load_embeddings (bool): Use precomputed embeddings instead of raw video frames.  
+• --video_type (str): Type of video input (e.g., "mp4" or "jpeg").  
+• --multiCrop (bool): Enable multiple cropping strategies for temporal frames.  
+• --multiCropMode (str): Mode of cropping ("random" or "consecutives").  
+• --frame_per_crop (int): Number of frames per crop in multiCrop mode.  
+• --number_crop (int): Number of crop groups.  
+• --resize (int[3]): Resize dimensions (height, width, depth/scale).  
+• --mean (float[3]): Mean for each channel for normalization.  
+• --std (float[3]): Standard deviation for each channel.  
+• --num_fold (int): Test fold for nested cross-validation.  
+• --inner_loop (int): Validation fold for nested cross-validation.  
+• --task (str): Task to execute ("classification" or "reconstruction").  
+• --model (str): Model name (e.g., "endToEnd", "autoencoder", "fast").  
+• --num_classes (int): Total number of classes.  
+• --use_rdm1, --use_rdm2, --use_rdm3 (bool): Use range Doppler maps from respective receivers.  
+• --use_rdmmti1, --use_rdmmti2, --use_rdmmti3 (bool): Use range Doppler maps with MTI from each receiver.  
+• --gradient_clipping_value (int): Gradient clipping parameter.  
+• --optimizer (str): Choice of optimizer ("SGD", "Adam", "AdamW", etc.).  
+• --learning_rate (float): Learning rate.  
+• --weight_decay (float): L2 regularization weight.  
+• --enable_scheduler (bool): Enable learning rate scheduler.  
+• --scheduler_factor (float): Factor for learning rate changes.  
+• --scheduler_threshold (float): Threshold for triggering scheduler updates.  
+• --scheduler_patience (int): Patience (epochs) before scheduler modifies the learning rate.  
+• --batch_size (int): Batch size per training iteration.  
+• --epochs (int): Maximum number of training epochs.  
+• --experiment (str): Experiment name (default auto-generated if not supplied).  
+• --logdir (str): Directory for logging and checkpoints.  
+• --start_tensorboard_server (bool): Automatically launch a TensorBoard server.  
+• --tensorboard_port (int): Port for the TensorBoard server.  
+• --saveLogsError, --saveLogs, --save_array_file, --save_image_file (bool): Flags for saving logs/files for error analysis, general predictions, arrays, and images.  
+• --enable_cudaAMP (bool): Enable CUDA Automatic Mixed Precision.  
+• --device (str): Device to use (e.g., "cpu", "cuda", "cuda:0").  
+• --distributed (bool): Enable distributed training.  
+• --dist_url (str): Initialization method for distributed training.
 
---video_type
-Type: str
-Default: "mp4"
-Description: Video type (e.g., mp4 or jpeg).
+If you make use of this code, please cite us:
 
---multiCrop
-Type: int (converted to boolean)
-Options: 0, 1
-Default: 0
-Description: Flag to perform frame cropping.
+@inproceedings{mineo2024sign,  
+  title={Sign Language Recognition for Patient-Doctor Communication: A Multimedia/Multimodal Dataset},  
+  author={Mineo, Raffaele and Caligiore, Gaia and Spampinato, Concetto and Fontana, Sabina and Palazzo, Simone and Ragonese, Egidio},  
+  booktitle={2024 IEEE 8th Forum on Research and Technologies for Society and Industry Innovation (RTSI)},  
+  pages={202--207},  
+  year={2024},  
+  organization={IEEE}  
+}
 
---multiCropMode
-Type: str
-Default: "random"
-Description: Cropping mode when multiCrop is enabled (e.g., "random" or "consecutives").
+@inproceedings{caligiore-etal-2024-multisource,  
+  title = {Multisource Approaches to Italian Sign Language ({LIS}) Recognition: Insights from the MultiMedaLIS Dataset},  
+  author = {Caligiore, Gaia and Mineo, Raffaele and Spampinato, Concetto and Ragonese, Egidio and Palazzo, Simone and Fontana, Sabina},  
+  editor = {DellOrletta, Felice and Lenci, Alessandro and Montemagni, Simonetta and Sprugnoli, Rachele},  
+  booktitle = {Proceedings of the 10th Italian Conference on Computational Linguistics (CLiC-it 2024)},  
+  month = dec,  
+  year = {2024},  
+  address = {Pisa, Italy},  
+  publisher = {CEUR Workshop Proceedings},  
+  url = {https://aclanthology.org/2024.clicit-1.17/},  
+  pages = {132--140},  
+  ISBN = {979-12-210-7060-6}  
+}
 
---frame_per_crop
-Type: int
-Default: 100
-Description: Number of frames per crop in multiCrop mode.
+@inproceedings{mineo2025radar,  
+  title={Radar-Based Imaging for Sign Language Recognition in Medical Communication},  
+  author={Mineo, Raffaele and Caligiore, Gaia and Proietto Salanitri, Federica and Kavasidis, Isaak and Polikovsky, Senya and Fontana, Sabina and Ragonese, Egidio and Spampinato, Concetto and Palazzo, Simone},  
+  booktitle={International Conference on Medical Image Computing and Computer-Assisted Intervention},  
+  year={2025},  
+  organization={Springer}  
+}
 
---number_crop
-Type: int
-Default: 10
-Description: Number of groups of frames (crops).
-
---resize
-Type: int (nargs=3)
-Default: [64, 128, 1024]
-Description: Resize dimensions (height, width, depth/scale) for the videos.
-
---mean
-Type: float (nargs=3)
-Default: [0.0]
-Description: Mean values for channel normalization.
-
---std
-Type: float (nargs=3)
-Default: [1.0]
-Description: Standard deviation for channel normalization.
-
---num_fold
-Type: int
-Default: 0
-Description: Test fold for nested cross-validation.
-
---inner_loop
-Type: int
-Default: 0
-Description: Validation fold for nested cross-validation.
-
---task
-Type: str
-Default: "classification"
-Description: Task to perform (either "reconstruction" or "classification").
-
---model
-Type: str
-Default: "endToEnd_Resnet"
-Description: Model to be used. Options include models such as "autoencoder", "endToEnd", "endToEnd_fast", etc.
-
---num_classes
-Type: int
-Default: 126
-Description: Number of classes in the dataset.
-
---use_rdm1, --use_rdm2, --use_rdm3
-Type: int (converted to boolean)
-Default: 1
-Description: Flags to use the range doppler maps from respective receivers (rx1, rx2, rx3).
-
---use_rdmmti1, --use_rdmmti2, --use_rdmmti3
-Type: int (converted to boolean)
-Default: 1
-Description: Flags to use the range doppler maps with MTI for each receiver.
-
---gradient_clipping_value
-Type: int
-Default: 0
-Description: Gradient clipping value.
-
---optimizer
-Type: str
-Options: 'SGD', 'Adam', 'AdamW', 'RMSprop', 'LBFGS'
-Default: "AdamW"
-Description: Optimizer choice for training.
-
---learning_rate
-Type: float
-Default: 1e-4
-Description: Learning rate.
-
---weight_decay
-Type: float
-Default: 1e-3
-Description: L2 regularization weight.
-
---enable_scheduler
-Type: int (converted to boolean)
-Options: 0, 1
-Default: 0
-Description: Enables the learning rate scheduler.
-
---scheduler_factor
-Type: float
-Default: 8e-2
-Description: Factor for reducing/increasing the learning rate via the scheduler.
-
---scheduler_threshold
-Type: float
-Default: 1e-2
-Description: Threshold for updating the learning rate through the scheduler.
-
---scheduler_patience
-Type: int
-Default: 5
-Description: Number of epochs to wait before changing the learning rate.
-
---batch_size
-Type: int
-Default: 16
-Description: Batch size.
-
---epochs
-Type: int
-Default: 10000
-Description: Maximum number of training epochs.
-
---experiment
-Type: str
-Default: None (if not provided, generated from the model name and timestamp)
-Description: Name of the experiment.
-
---logdir
-Type: str
-Default: "./logs"
-Description: Directory for logs and checkpoints.
-
---start_tensorboard_server
-Type: int (converted to boolean)
-Options: 0, 1
-Default: 0
-Description: Whether to start the Tensorboard server.
-
---tensorboard_port
-Type: int
-Default: 6006
-Description: Port number for the Tensorboard server.
-
---saveLogsError, --saveLogs, --save_array_file, --save_image_file
-Type: int (converted to boolean)
-Description: Flags that control saving detailed error logs, general logs, array files, and image files respectively.
-
---enable_cudaAMP
-Type: int (converted to boolean)
-Options: 0, 1
-Default: 1
-Description: Enables CUDA Automatic Mixed Precision (AMP).
-
---device
-Type: str
-Default: "cuda"
-Description: Specifies the device to use (e.g., "cpu", "cuda", "cuda:[number]").
-
---distributed
-Type: int (converted to boolean)
-Options: 0, 1
-Default: 0
-Description: Enables distributed training.
-
---dist_url
-Type: str
-Default: "env://"
-Description: Initialization method for distributed training.
+This code is taken from https://github.com/IngRaffaeleMineo/3D-BCPTcode and modified to our target.
